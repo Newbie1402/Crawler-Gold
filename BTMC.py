@@ -208,6 +208,130 @@ HTML_TEMPLATE = """
     <title>Giá vàng Bảo Tín Minh Châu</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .sort-container {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
+            position: relative;
+        }
+
+        .sort-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px;
+            margin: 0 2px;
+            border-radius: 3px;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .sort-button:hover {
+            background-color: var(--light-primary);
+        }
+
+        .sort-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: var(--justify, flex-start);
+        }
+
+        .filter-active {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-right: 10px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .history-filter {
+            margin-bottom: 15px;
+        }
+
+        .filter-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .filter-group-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+            display: block;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            background-color: #f1f1f1;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-btn:hover {
+            background-color: var(--light-primary);
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .filter-icon {
+            font-size: 0.8rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .apply-btn, .clear-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .apply-btn:hover, .clear-btn:hover {
+            background-color: var(--light-primary);
+        }
+    </style>
 </head>
 <body>
     <div class="navbar">
@@ -294,18 +418,94 @@ HTML_TEMPLATE = """
                 <h2>Lịch sử giá vàng 7 ngày gần nhất</h2>
             </div>
             <div class="card-body">
-                <table>
+                <!-- Thanh công cụ lọc và sắp xếp -->
+                <div class="history-filter">
+                    <span class="filter-active" id="active-filter">Sắp xếp mặc định</span>
+
+                    <div class="filter-wrapper">
+                        <div class="filter-group">
+                            <span class="filter-group-title">Theo thời gian</span>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" data-filter="time" data-value="desc" onclick="toggleFilter(this, 'time')">
+                                    <span class="filter-icon">⏱️</span> Mới nhất
+                                </button>
+
+                                <button class="filter-btn" data-filter="time" data-value="asc" onclick="toggleFilter(this, 'time')">
+                                    <span class="filter-icon">⏱️</span> Cũ nhất
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <span class="filter-group-title">Theo loại vàng</span>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" data-filter="goldType" data-value="Giá vàng Miếng" onclick="toggleFilter(this, 'goldType')">
+                                    <span class="filter-icon">🪙</span> Vàng miếng
+                                </button>
+
+                                <button class="filter-btn" data-filter="goldType" data-value="Giá vàng Nhẫn" onclick="toggleFilter(this, 'goldType')">
+                                    <span class="filter-icon">💍</span> Vàng nhẫn
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <span class="filter-group-title">Theo giá mua vào</span>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" data-filter="buy" data-value="asc" onclick="toggleFilter(this, 'buy')">
+                                    <span class="filter-icon">💰</span> Rẻ nhất trước
+                                </button>
+
+                                <button class="filter-btn" data-filter="buy" data-value="desc" onclick="toggleFilter(this, 'buy')">
+                                    <span class="filter-icon">💰</span> Đắt nhất trước
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <span class="filter-group-title">Theo giá bán ra</span>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" data-filter="sell" data-value="asc" onclick="toggleFilter(this, 'sell')">
+                                    <span class="filter-icon">💸</span> Rẻ nhất trước
+                                </button>
+
+                                <button class="filter-btn" data-filter="sell" data-value="desc" onclick="toggleFilter(this, 'sell')">
+                                    <span class="filter-icon">💸</span> Đắt nhất trước
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="apply-filters" class="apply-btn" onclick="applyAllFilters()">Áp dụng</button>
+                        <button id="clear-filters" class="clear-btn" onclick="clearAllFilters()">Xóa lọc</button>
+                    </div>
+                </div>
+
+                <table id="history-table">
                     <thead>
                         <tr>
-                            <th style="width: 22%; text-align: left;">Thời gian</th>
+                            <th style="width: 22%; text-align: left;">
+                                <div class="column-header">
+                                    Thời gian
+                                </div>
+                            </th>
                             <th style="width: 28%; text-align: left;">Loại vàng</th>
-                            <th style="width: 25%; text-align: right;" class="price-header">Mua vào</th>
-                            <th style="width: 25%; text-align: right;" class="price-header">Bán ra</th>
+                            <th style="width: 25%; text-align: right;" class="price-header">
+                                <div class="column-header" style="--justify: flex-end">
+                                    Mua vào
+                                </div>
+                            </th>
+                            <th style="width: 25%; text-align: right;" class="price-header">
+                                <div class="column-header" style="--justify: flex-end">
+                                    Bán ra
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in history %}
-                        <tr>
+                        <tr data-timestamp="{{ item['timestamp'] }}" data-buy="{{ item['Mua vào'] or 0 }}" data-sell="{{ item['Bán ra'] or 0 }}">
                             <td style="text-align: left;">{{ item['time'] }}</td>
                             <td style="text-align: left;">
                                 <div class="gold-type">
@@ -345,6 +545,201 @@ HTML_TEMPLATE = """
     </div>
 
     <script>
+        // Lưu trữ bộ lọc đã chọn
+        const activeFilters = {
+            time: null,
+            goldType: null,
+            buy: null,
+            sell: null
+        };
+
+        // Hàm bật/tắt bộ lọc
+        function toggleFilter(button, filterType) {
+            const filterValue = button.getAttribute('data-value');
+            const isActive = button.classList.contains('active');
+
+            // Nếu nút đang active, bỏ chọn nút đó và xóa bộ lọc tương ứng
+            if (isActive) {
+                button.classList.remove('active');
+                activeFilters[filterType] = null;
+            } else {
+                // Bỏ chọn các nút khác cùng loại
+                document.querySelectorAll(`.filter-btn[data-filter="${filterType}"]`).forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Chọn nút hiện tại và lưu giá trị lọc
+                button.classList.add('active');
+                activeFilters[filterType] = filterValue;
+            }
+
+            // Cập nhật nội dung bộ lọc đang chọn
+            updateActiveFilterText();
+        }
+
+        // Hàm cập nhật văn bản hiển thị bộ lọc đang hoạt động
+        function updateActiveFilterText() {
+            const activeFilterText = document.getElementById('active-filter');
+            const selectedFilters = [];
+
+            // Kiểm tra từng loại bộ lọc và thêm vào mảng nếu đang hoạt động
+            if (activeFilters.time) {
+                selectedFilters.push(activeFilters.time === 'desc' ? 'Mới nhất trước' : 'Cũ nhất trước');
+            }
+
+            if (activeFilters.goldType) {
+                selectedFilters.push(activeFilters.goldType === 'Giá vàng Miếng' ? 'Vàng miếng' : 'Vàng nhẫn');
+            }
+
+            if (activeFilters.buy) {
+                selectedFilters.push('Mua vào: ' + (activeFilters.buy === 'asc' ? 'Rẻ nhất trước' : 'Đắt nhất trước'));
+            }
+
+            if (activeFilters.sell) {
+                selectedFilters.push('Bán ra: ' + (activeFilters.sell === 'asc' ? 'Rẻ nhất trước' : 'Đắt nhất trước'));
+            }
+
+            // Cập nhật nội dung hiển thị
+            if (selectedFilters.length > 0) {
+                activeFilterText.textContent = 'Bộ lọc đang chọn: ' + selectedFilters.join(', ');
+            } else {
+                activeFilterText.textContent = 'Sắp xếp mặc định';
+            }
+        }
+
+        // Hàm áp dụng tất cả các bộ lọc đang hoạt động
+        function applyAllFilters() {
+            const table = document.getElementById('history-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Bắt đầu với tất cả các hàng
+            let filteredRows = [...rows]; // Tạo một bản sao của mảng rows
+
+            // Lọc theo loại vàng (nếu có)
+            if (activeFilters.goldType) {
+                filteredRows = filteredRows.filter(row => {
+                    const goldTypeCell = row.querySelector('td:nth-child(2)');
+                    return goldTypeCell.textContent.trim().includes(activeFilters.goldType);
+                });
+            }
+
+            // Thiết lập các thuộc tính data-* cho mỗi hàng để đảm bảo rằng chúng được đọc chính xác
+            rows.forEach(row => {
+                if (!row.dataset.type) {
+                    const typeCell = row.querySelector('td:nth-child(2)');
+                    if (typeCell) {
+                        const type = typeCell.textContent.trim().includes("Giá vàng Miếng") ?
+                            "Giá vàng Miếng" : "Giá vàng Nhẫn";
+                        row.dataset.type = type;
+                    }
+                }
+            });
+
+            // Sắp xếp dữ liệu dựa trên các bộ lọc đã chọn
+            if (activeFilters.time || activeFilters.buy || activeFilters.sell) {
+                filteredRows.sort((a, b) => {
+                    // Nếu lọc theo thời gian được áp dụng
+                    if (activeFilters.time) {
+                        const timeA = parseFloat(a.dataset.timestamp);
+                        const timeB = parseFloat(b.dataset.timestamp);
+
+                        if (timeA !== timeB) {
+                            return activeFilters.time === 'asc' ? timeA - timeB : timeB - timeA;
+                        }
+                    }
+
+                    // Nếu lọc theo giá mua vào được áp dụng
+                    if (activeFilters.buy) {
+                        const buyA = parseFloat(a.dataset.buy);
+                        const buyB = parseFloat(b.dataset.buy);
+
+                        if (buyA !== buyB) {
+                            return activeFilters.buy === 'asc' ? buyA - buyB : buyB - buyA;
+                        }
+                    }
+
+                    // Nếu lọc theo giá bán ra được áp dụng
+                    if (activeFilters.sell) {
+                        const sellA = parseFloat(a.dataset.sell);
+                        const sellB = parseFloat(b.dataset.sell);
+
+                        if (sellA !== sellB) {
+                            return activeFilters.sell === 'asc' ? sellA - sellB : sellB - sellA;
+                        }
+                    }
+
+                    return 0;
+                });
+            }
+
+            // Ẩn tất cả các hàng
+            rows.forEach(row => row.style.display = 'none');
+
+            // Hiển thị các hàng đã lọc và sắp xếp
+            filteredRows.forEach(row => {
+                row.style.display = '';
+                tbody.appendChild(row); // Di chuyển hàng lên đầu bảng
+            });
+
+            // Thêm hiệu ứng highlight
+            filteredRows.forEach(row => {
+                row.classList.add('highlight');
+                setTimeout(() => row.classList.remove('highlight'), 2000);
+            });
+
+            // Hiển thị thông báo nếu không có kết quả
+            const noResultsMessage = document.getElementById('no-results-message');
+            if (filteredRows.length === 0) {
+                if (!noResultsMessage) {
+                    const message = document.createElement('div');
+                    message.id = 'no-results-message';
+                    message.textContent = 'Không có kết quả phù hợp với bộ lọc đã chọn';
+                    message.style.textAlign = 'center';
+                    message.style.padding = '20px';
+                    message.style.color = '#666';
+                    table.parentNode.insertBefore(message, table.nextSibling);
+                }
+            } else if (noResultsMessage) {
+                noResultsMessage.remove();
+            }
+
+            // Cập nhật văn bản hiển thị bộ lọc đang áp dụng
+            updateActiveFilterText();
+        }
+
+        // Hàm xóa tất cả các bộ lọc
+        function clearAllFilters() {
+            // Bỏ chọn tất cả các nút lọc
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Đặt lại tất cả các bộ lọc về null
+            for (const key in activeFilters) {
+                activeFilters[key] = null;
+            }
+
+            // Cập nhật nội dung hiển thị
+            updateActiveFilterText();
+
+            // Hiển thị lại tất cả các hàng theo thứ tự mới nhất
+            const table = document.getElementById('history-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Sắp xếp theo thời gian mới nhất
+            rows.sort((a, b) => {
+                return parseFloat(b.dataset.timestamp) - parseFloat(a.dataset.timestamp);
+            });
+
+            // Hiển thị lại tất cả các hàng
+            rows.forEach(row => {
+                row.style.display = '';
+                tbody.appendChild(row);
+            });
+        }
+
         function refreshData() {
             document.getElementById('status').textContent = 'Đang cập nhật...';
             fetch(window.location.href)
@@ -360,12 +755,41 @@ HTML_TEMPLATE = """
                     document.querySelectorAll('tr').forEach(row => {
                         row.classList.add('highlight');
                     });
+
+                    // Khởi tạo lại sau khi tải dữ liệu mới
+                    initFilters();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     document.getElementById('status').textContent = 'Lỗi khi cập nhật';
                 });
         }
+
+        // Hàm khởi tạo khi trang tải xong
+        function initFilters() {
+            // Đặt lại tất cả bộ lọc về giá trị mặc định
+            for (const key in activeFilters) {
+                activeFilters[key] = null;
+            }
+
+            // Bỏ chọn tất cả các nút lọc
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Cập nhật nội dung hiển thị
+            updateActiveFilterText();
+
+            // Áp dụng sắp xếp mặc định (mới nhất trước)
+            const timeNewestBtn = document.querySelector('.filter-btn[data-filter="time"][data-value="desc"]');
+            if (timeNewestBtn) {
+                toggleFilter(timeNewestBtn, 'time');
+                applyAllFilters();
+            }
+        }
+
+        // Sắp xếp mặc định khi tải trang
+        window.addEventListener('load', initFilters);
     </script>
 
     <footer>
