@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from flask import Flask, render_template_string
 
 def make_session(retries=3, backoff_factor=0.3, status_forcelist=(500,502,504)):
     s = requests.Session()
@@ -78,10 +79,13 @@ def crawl_btmc(debug=False):
                         sell_price = parsed_price
 
             if buy_price is not None or sell_price is not None:
+                # Định dạng lại thời gian cho dễ nhìn
+                now = datetime.now()
+                formatted_time = now.strftime("%d/%m/%Y %H:%M:%S")
                 record = {
                     "dealer": "BTMC",
                     "type": gold_type,
-                    "time": datetime.now().isoformat(),
+                    "time": formatted_time,
                     "Mua vào": buy_price,
                     "Bán ra": sell_price
                 }
@@ -89,9 +93,58 @@ def crawl_btmc(debug=False):
 
     return results
 
-if __name__ == "__main__":
+app = Flask(__name__)
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bảng giá vàng Bảo Tín Minh Châu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+        .container { width: 100vw; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        table { border-collapse: collapse; width: 90vw; max-width: 1400px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        th, td { border: 1px solid #ccc; padding: 16px 20px; text-align: center; font-size: 1.25em; }
+        th { background: #f7f7f7; }
+        caption { font-size: 2em; margin-bottom: 18px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <table>
+        <caption>Bảng giá vàng Bảo Tín Minh Châu</caption>
+        <tr>
+            <th>Loại vàng</th>
+            <th>Mua vào</th>
+            <th>Bán ra</th>
+            <th>Thời gian</th>
+        </tr>
+        {% for item in data %}
+        <tr>
+            <td>{{ item['type'] }}</td>
+            <td>{{ "{:,.0f}".format(item['Mua vào']) if item['Mua vào'] else "" }}</td>
+            <td>{{ "{:,.0f}".format(item['Bán ra']) if item['Bán ra'] else "" }}</td>
+            <td>{{ item['time'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</body>
+</html>
+"""
+
+@app.route("/")
+def index():
     data = crawl_btmc(debug=False)
-    print("\nDữ liệu đã cào vàng Bảo Tín Minh Châu:")
-    for item in data:
-        print(item)
+    return render_template_string(HTML_TEMPLATE, data=data)
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "web":
+        app.run(debug=True)
+    else:
+        data = crawl_btmc(debug=False)
+        print("\nDữ liệu đã cào vàng Bảo Tín Minh Châu:")
+        for item in data:
+            print(item)
 
