@@ -1,0 +1,261 @@
+:root {
+    --bg-color: #f8f9fa;
+    --primary-color: #0d6efd;
+    --light-primary: #e7f1ff;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --header-bg: #f1f8ff;
+    --increase-color: #198754;
+    --decrease-color: #dc3545;
+    --neutral-color: #6c757d;
+    --gold-bar-color: #E6A817; /* Màu vàng miếng */
+    --gold-ring-color: #9C6644; /* Màu vàng nhẫn */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.navbar {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar h1 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.container {
+    max-width: 1400px; /* Tăng kích thước tối đa */
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background: white;
+    border-radius: 12px; /* Bo góc nhiều hơn */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Đổ bóng rõ hơn */
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+}
+
+.card-header {
+    background: var(--header-bg);
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h2 {
+    font-size: 1.5rem; /* Chữ to hơn */
+    font-weight: 500;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.card-body {
+    padding: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1.25rem 1.75rem; /* Padding lớn hơn */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    background-color: var(--light-primary);
+    font-weight: 600; /* In đậm hơn */
+    color: var(--primary-color);
+    font-size: 1.1rem; /* Chữ to hơn */
+}
+
+tr:nth-child(even) {
+    background-color: rgba(0,0,0,0.01);
+}
+
+tr:hover {
+    background-color: rgba(0,0,0,0.03);
+}
+
+.price {
+    font-weight: 500;
+    text-align: right;
+    font-size: 1.2rem; /* Chữ to hơn */
+    width: 200px; /* Đảm bảo chiều rộng cột cố định */
+}
+
+.price-header {
+    text-align: right;
+    width: 200px; /* Đảm bảo chiều rộng cột tiêu đề cố định */
+}
+
+.price-cell {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+}
+
+.price-value {
+    min-width: 120px;
+    width: 120px;
+    text-align: right;
+    display: inline-block;
+}
+
+.trend {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.trend-up {
+    color: var(--increase-color);
+}
+
+.trend-down {
+    color: var(--decrease-color);
+}
+
+.trend-same {
+    color: var(--neutral-color);
+}
+
+.percent {
+    font-size: 0.85rem;
+    margin-left: 2px;
+}
+
+.refresh {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.refresh:hover {
+    background-color: #0b5ed7;
+}
+
+.timestamp {
+    text-align: center;
+    color: var(--neutral-color);
+    margin: 1rem 0;
+    font-size: 1rem;
+}
+
+.status {
+    color: var(--primary-color);
+    font-size: 1rem;
+    margin-right: 1.5rem;
+}
+
+/* Màu cho các loại vàng */
+.gold-bar {
+    color: var(--gold-bar-color);
+    font-weight: 600;
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.1);
+}
+
+.gold-ring {
+    color: var(--gold-ring-color);
+    font-weight: 600;
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.1);
+}
+
+/* Tối ưu hiệu ứng nhấp nháy */
+@keyframes highlight {
+    0% { background-color: rgba(13, 110, 253, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.highlight {
+    animation: highlight 2s;
+}
+
+/* Thêm icon cho loại vàng */
+.gold-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gold-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    th, td {
+        padding: 0.75rem;
+    }
+
+    .price {
+        font-size: 1rem;
+    }
+
+    .navbar {
+        padding: 0.8rem 1rem;
+    }
+
+    .navbar h1 {
+        font-size: 1.4rem;
+    }
+
+    .container {
+        padding: 0 0.5rem;
+        margin: 1rem auto;
+    }
+
+    .card-header {
+        padding: 1rem;
+    }
+
+    .card-header h2 {
+        font-size: 1.3rem;
+    }
+}
